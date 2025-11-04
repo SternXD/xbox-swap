@@ -6,6 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 
+# UWP configuration
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+    set(CMAKE_SYSTEM_VERSION 10.0)
+    add_definitions(-D_XBOX_UWP)
+endif()
+
 add_library( xbox-fmalloc SHARED src/dllmain.cpp src/fmalloc.cpp externals/o1heap/o1heap/o1heap.c )
 set_property(TARGET xbox-fmalloc PROPERTY
              MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
