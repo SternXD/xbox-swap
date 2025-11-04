@@ -17,7 +17,7 @@
 extern "C" {
 WINBASEAPI
 _Ret_maybenull_ PVOID WINAPI AddVectoredExceptionHandler(
-    _In_ ULONG First, _In_ PVECTORED_EXCEPTION_HANDLER Handler);
+	_In_ ULONG First, _In_ PVECTORED_EXCEPTION_HANDLER Handler);
 
 WINBASEAPI
 ULONG
@@ -44,7 +44,7 @@ RemoveVectoredExceptionHandler(_In_ PVOID Handle);
 
 unsigned long distance(long x, long y) {
   return (x > y) ? (unsigned long)x - (unsigned long)y
-                 : (unsigned long)y - (unsigned long)x;
+				 : (unsigned long)y - (unsigned long)x;
 }
 
 #define MAPFILE_MAX_LOADED_BYTES 536870912
@@ -78,18 +78,18 @@ size_t inline get_view_to_unmap() {
   size_t index = 0;
   long max_distance = 0;
   for (size_t v = 0; v < views_last_swap.size(); ++v) {
-    long component_distance = distance(time, views_last_swap.at(v));
-    if (component_distance > max_distance) {
-      index = v;
-      max_distance = component_distance;
-    }
+	long component_distance = distance(time, views_last_swap.at(v));
+	if (component_distance > max_distance) {
+	  index = v;
+	  max_distance = component_distance;
+	}
   }
   return index;
 }
 
 int fallocate(HANDLE hndl, long long int size_to_reserve) {
   if (size_to_reserve <= 0)
-    return 0;
+	return 0;
 
   LARGE_INTEGER minus_one = {0}, zero = {0};
   minus_one.QuadPart = -1;
@@ -97,23 +97,23 @@ int fallocate(HANDLE hndl, long long int size_to_reserve) {
   // Get the current file position
   LARGE_INTEGER old_pos = {0};
   if (!SetFilePointerEx(hndl, zero, &old_pos, FILE_CURRENT))
-    return -1;
+	return -1;
 
   // Move file position to the new end. These calls do NOT result in the actual
   // allocation of new blocks, but they must succeed.
   LARGE_INTEGER new_pos = {0};
   new_pos.QuadPart = size_to_reserve;
   if (!SetFilePointerEx(hndl, new_pos, NULL, FILE_END))
-    return -1;
+	return -1;
   if (!SetEndOfFile(hndl))
-    return -1;
+	return -1;
 
   if (!SetFilePointerEx(hndl, minus_one, NULL, FILE_END))
-    return -1;
+	return -1;
   char initializer_buf[1] = {1};
   DWORD written = 0;
   if (!WriteFile(hndl, initializer_buf, 1, &written, NULL))
-    return -1;
+	return -1;
 
   return 0;
 }
@@ -126,12 +126,12 @@ void fmalloc_init(const char *filepath, size_t max_size) {
   nemory_mapping_init(filepath, max_size);
   instance = o1heapInit(fmalloced_base, max_size);
   if (instance == NULL) {
-    return;
+	return;
   }
 
   if (!InitializeCriticalSectionAndSpinCount(&memory_critical_section,
-                                             0x00000400)) {
-    return;
+											 0x00000400)) {
+	return;
   }
 }
 
@@ -338,7 +338,7 @@ void nemory_mapping_deinit() {
   exception_handler = NULL;
 
   for (size_t index = 0; index < views.size(); ++index) {
-    UnmapViewOfFile(views.at(index));
+	UnmapViewOfFile(views.at(index));
   }
 
   VirtualFree(fmalloced_base, 0, MEM_RELEASE);

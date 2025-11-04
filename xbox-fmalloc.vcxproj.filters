@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals">
+      <UniqueIdentifier>{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\o1heap">
+      <UniqueIdentifier>{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC943}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\o1heap\o1heap">
+      <UniqueIdentifier>{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC944}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dllmain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmalloc.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\o1heap\o1heap\o1heap.c">
+      <Filter>externals\o1heap\o1heap</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\fmalloc.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\o1heap\o1heap\o1heap.h">
+      <Filter>externals\o1heap\o1heap</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
