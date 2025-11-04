@@ -1,2 +1,3 @@
 # xbox-swap
-Allocation library leveraging file swap techniquest and o1heap to allow allocations over 5gb on xbox
+
+A memory allocation library for Xbox that uses file-backed swapping and o1heap, enabling efficient allocations beyond 5GB.
