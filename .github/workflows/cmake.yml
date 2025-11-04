@@ -1,0 +1,49 @@
+name: CMake Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        config: [Debug, Release]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
+        
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . `
+          -G "Visual Studio 17 2022" `
+          -A x64 `
+          -DCMAKE_SYSTEM_NAME=WindowsStore `
+          -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          
+    - name: Build
+      run: |
+        cmake --build build --config ${{ matrix.config }} --parallel
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v5
+      with:
+        name: xbox-fmalloc-${{ matrix.config }}-x64
+        path: |
+          build/${{ matrix.config }}/*.dll
+          build/${{ matrix.config }}/*.lib
+          build/${{ matrix.config }}/*.pdb
+        if-no-files-found: warn
+        retention-days: 7
+

@@ -1,0 +1,50 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        config: [Debug, Release]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
+        
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Restore NuGet packages (if any)
+      run: nuget restore xbox-fmalloc.sln || echo "No NuGet packages to restore"
+      continue-on-error: true
+      
+    - name: Build solution
+      run: |
+        msbuild xbox-fmalloc.sln `
+          /p:Configuration=${{ matrix.config }} `
+          /p:Platform=x64 `
+          /p:PlatformToolset=v143 `
+          /m `
+          /v:minimal
+          
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v5
+      with:
+        name: xbox-fmalloc-${{ matrix.config }}-x64-msbuild
+        path: |
+          build/x64/${{ matrix.config }}/*.dll
+          build/x64/${{ matrix.config }}/*.lib
+          build/x64/${{ matrix.config }}/*.pdb
+        if-no-files-found: warn
+        retention-days: 7
+

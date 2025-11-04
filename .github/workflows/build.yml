@@ -1,0 +1,85 @@
+name: Build All
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  cmake-build:
+    name: CMake Build (${{ matrix.config }})
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        config: [Debug, Release]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
+        
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . `
+          -G "Visual Studio 17 2022" `
+          -A x64 `
+          -DCMAKE_SYSTEM_NAME=WindowsStore `
+          -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          
+    - name: Build
+      run: |
+        cmake --build build --config ${{ matrix.config }} --parallel
+        
+    - name: Upload CMake artifacts
+      uses: actions/upload-artifact@v5
+      with:
+        name: cmake-${{ matrix.config }}-x64
+        path: build/${{ matrix.config }}/*.dll
+        if-no-files-found: warn
+        retention-days: 7
+
+  msbuild-build:
+    name: MSBuild (${{ matrix.config }})
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        config: [Debug, Release]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: recursive
+        
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Build solution
+      run: |
+        msbuild xbox-fmalloc.sln `
+          /p:Configuration=${{ matrix.config }} `
+          /p:Platform=x64 `
+          /p:PlatformToolset=v143 `
+          /m `
+          /v:minimal `
+          /t:Build
+          
+    - name: Upload MSBuild artifacts
+      uses: actions/upload-artifact@v5
+      with:
+        name: msbuild-${{ matrix.config }}-x64
+        path: |
+          build/x64/${{ matrix.config }}/*.dll
+          build/x64/${{ matrix.config }}/*.lib
+          build/x64/${{ matrix.config }}/*.pdb
+        if-no-files-found: warn
+        retention-days: 7
+
