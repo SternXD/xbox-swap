@@ -166,7 +166,7 @@ XBOXFMALLOC_API void fmalloc_close() {
 HANDLE open_map_file(const char* filepath, size_t max_size) {
 	struct _stat64 st;
 	std::wstring filepathw(filepath, filepath + strlen(filepath));
-	if (_stat64(filepath, &st) < 0 || st.st_size < max_size) {
+	if (_stat64(filepath, &st) < 0 || st.st_size < static_cast<__int64>(max_size)) {
 		// try to create it
 
 		HANDLE hFile = CreateFileFromAppW(filepathw.c_str(),		// Name of the file
@@ -246,7 +246,8 @@ ShadowExceptionHandler(PEXCEPTION_POINTERS exception_pointers) {
 		int debug = 0;
 	}
 	//Free old page
-	bResult = VirtualFree(swap_handle, MAPFILE_PAGE_SIZE, MEM_RELEASE | MEM_PRESERVE_PLACEHOLDER);
+	// Note: When using MEM_RELEASE, dwSize must be 0
+	bResult = VirtualFree(swap_handle, 0, MEM_RELEASE | MEM_PRESERVE_PLACEHOLDER);
 	if (!bResult)
 	{
 		int error = GetLastError();
@@ -296,9 +297,15 @@ void nemory_mapping_init(const char* files_prefix, size_t size) {
 			MEM_RESERVE | MEM_RESERVE_PLACEHOLDER, PAGE_NOACCESS, nullptr, 0);
 
 	// split it in file pages
+	// Note: When using MEM_RELEASE, dwSize must be 0
 	for (size_t index = 0; index < pages - 1; ++index) {
-		if (!VirtualFree((char*)fmalloced_base + index * MAPFILE_PAGE_SIZE,
-			MAPFILE_PAGE_SIZE,
+		void* address_to_free = (char*)fmalloced_base + index * MAPFILE_PAGE_SIZE;
+		if (address_to_free == nullptr) {
+			fmalloced_base = nullptr;
+			break;
+		}
+		if (!VirtualFree(address_to_free,
+			0,
 			MEM_RELEASE | MEM_PRESERVE_PLACEHOLDER)) {
 			int error = GetLastError();
 			fmalloced_base = nullptr;
